@@ -15,8 +15,11 @@ export async function GET(request: Request) {
     const search = searchParams.get("search") || undefined;
     const cursor = searchParams.get("cursor") || undefined;
 
+    console.log("[Agents API] Request received, checking credentials...");
+
     if (hasPicaCredentials()) {
       try {
+        console.log("[Agents API] Using Pica API");
         const data = await listAgents({
           page_size: safePageSize,
           search,
@@ -24,17 +27,23 @@ export async function GET(request: Request) {
         });
         return NextResponse.json(data);
       } catch (picaError) {
-        console.error("Pica API failed, falling back to Supabase:", picaError);
+        console.error("[Agents API] Pica API failed, falling back to Supabase:", picaError);
       }
     }
 
+    console.log("[Agents API] Fetching from Supabase...");
     const { data: agents, error } = await supabase
       .from("agents")
       .select("*")
       .order("created_at", { ascending: false })
       .limit(safePageSize);
 
-    if (error) throw error;
+    if (error) {
+      console.error("[Agents API] Supabase error:", error);
+      throw error;
+    }
+
+    console.log(`[Agents API] Supabase returned ${agents?.length || 0} agents`);
 
     const formattedAgents = (agents || []).map((agent) => ({
       agent_id: agent.id,
@@ -48,6 +57,7 @@ export async function GET(request: Request) {
       has_more: false,
     });
   } catch (err) {
+    console.error("[Agents API] Unexpected error:", err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Unknown error" },
       { status: 500 }
