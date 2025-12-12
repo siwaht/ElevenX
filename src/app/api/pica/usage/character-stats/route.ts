@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { getCharacterStats } from "@/lib/pica-client";
+import { supabase } from "@/lib/supabase";
+
+function hasPicaCredentials(): boolean {
+  return !!(process.env.PICA_SECRET_KEY && process.env.PICA_ELEVENLABS_CONNECTION_KEY);
+}
 
 export async function GET(request: Request) {
   try {
@@ -24,9 +29,35 @@ export async function GET(request: Request) {
       );
     }
 
-    const data = await getCharacterStats(startUnix, endUnix);
+    if (hasPicaCredentials()) {
+      try {
+        const data = await getCharacterStats(startUnix, endUnix);
+        return NextResponse.json(data);
+      } catch (picaError) {
+        console.error("Pica API failed, falling back to Supabase:", picaError);
+      }
+    }
 
-    return NextResponse.json(data);
+    const startDate = new Date(startUnix * 1000).toISOString().split('T')[0];
+    const endDate = new Date(endUnix * 1000).toISOString().split('T')[0];
+
+    const { data: stats, error } = await supabase
+      .from("usage_stats")
+      .select("*")
+      .gte("date", startDate)
+      .lte("date", endDate);
+
+    if (error) throw error;
+
+    const totalUsage = (stats || []).reduce(
+      (sum, stat) => sum + (stat.character_count || 0),
+      0
+    );
+
+    return NextResponse.json({
+      total_usage: totalUsage,
+      stats: stats,
+    });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Unknown error" },
