@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-
-import { PicaServer } from "@/lib/pica.server";
+import { supabase } from "@/lib/supabase";
 
 export async function GET(request: Request) {
   try {
@@ -25,7 +24,28 @@ export async function GET(request: Request) {
       );
     }
 
-    return await PicaServer.getCharacterStats(Math.floor(startUnix), Math.floor(endUnix));
+    const startDate = new Date(startUnix * 1000).toISOString().split('T')[0];
+    const endDate = new Date(endUnix * 1000).toISOString().split('T')[0];
+
+    const { data: stats, error } = await supabase
+      .from("usage_stats")
+      .select("*")
+      .gte("date", startDate)
+      .lte("date", endDate)
+      .order("date", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return NextResponse.json({
+      stats: stats?.map(stat => ({
+        date: stat.date,
+        character_count: stat.character_count,
+        call_count: stat.call_count,
+        total_duration_seconds: stat.total_duration_seconds,
+      })) || [],
+    });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Unknown error" },
