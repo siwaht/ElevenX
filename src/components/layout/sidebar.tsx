@@ -5,87 +5,117 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
     Users,
+    MessageSquare,
+    Mic,
+    Settings,
+    BarChart3,
+    Database,
     Phone,
     Wrench,
-    Database,
-    BarChart3,
-    Settings,
-    Menu,
-    X
-} from "lucide-react"; // Make sure to install lucide-react if not present
+    Menu
+} from "lucide-react";
+import { ThemeToggle } from "@/components/theme-provider";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
-const sidebarItems = [
-    { href: "/agents", label: "Agents", icon: Users },
-    { href: "/phone-numbers", label: "Phone Numbers", icon: Phone },
-    { href: "/tools", label: "Tools", icon: Wrench },
-    { href: "/knowledge", label: "Knowledge Base", icon: Database },
-    { href: "/analytics", label: "Analytics", icon: BarChart3 },
+const routes = [
+    {
+        label: "Agents",
+        icon: Users,
+        href: "/agents",
+        color: "text-sky-500",
+    },
+    {
+        label: "Phone Numbers",
+        icon: Phone,
+        href: "/phone-numbers",
+        color: "text-violet-500",
+    },
+    {
+        label: "Tools",
+        icon: Wrench,
+        href: "/tools",
+        color: "text-pink-700",
+    },
+    {
+        label: "Knowledge Base",
+        icon: Database,
+        href: "/knowledge",
+        color: "text-orange-700",
+    },
+    {
+        label: "Calls",
+        icon: MessageSquare,
+        href: "/calls",
+        color: "text-green-700",
+    },
+    {
+        label: "Analytics",
+        icon: BarChart3,
+        href: "/analytics",
+        color: "text-emerald-500",
+    },
 ];
 
 export function Sidebar() {
     const pathname = usePathname();
-    const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <>
-            {/* Mobile Toggle */}
-            <div className="md:hidden p-4 border-b flex items-center justify-between bg-background">
-                <div className="font-semibold text-lg">ElevenX</div>
-                <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)}>
-                    {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        <div className="space-y-4 py-4 flex flex-col h-full bg-slate-900 text-white">
+            <div className="px-3 py-2 flex-1">
+                <Link href="/agents" className="flex items-center pl-3 mb-14">
+                    <div className="relative w-8 h-8 mr-4">
+                        {/* Logo - simplified for code */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-violet-600 to-indigo-600 rounded-lg opacity-70 blur-sm"></div>
+                        <div className="relative bg-black rounded-lg w-full h-full flex items-center justify-center border border-white/10">
+                            <span className="font-bold text-xl">11</span>
+                        </div>
+                    </div>
+                    <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                        ElevenX
+                    </h1>
+                </Link>
+                <div className="space-y-1">
+                    {routes.map((route) => (
+                        <Link
+                            key={route.href}
+                            href={route.href}
+                            className={cn(
+                                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition",
+                                pathname.startsWith(route.href) ? "text-white bg-white/10" : "text-zinc-400"
+                            )}
+                        >
+                            <div className="flex items-center flex-1">
+                                <route.icon className={cn("h-5 w-5 mr-3", route.color)} />
+                                {route.label}
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            </div>
+            <div className="px-3 py-2">
+                <div className="px-3 mb-4">
+                    <ThemeToggle />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// Mobile Sidebar wrapper using Sheet
+export function MobileSidebar() {
+    const [open, setOpen] = useState(false);
+    return (
+        <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                    <Menu />
                 </Button>
-            </div>
-
-            {/* Sidebar Container */}
-            <div className={cn(
-                "fixed inset-y-0 left-0 z-50 w-64 bg-background border-r transform transition-transform duration-200 ease-in-out md:translate-x-0 md:static md:block",
-                isOpen ? "translate-x-0" : "-translate-x-full"
-            )}>
-                <div className="h-16 flex items-center px-6 border-b">
-                    <span className="font-bold text-xl tracking-tight">ElevenX</span>
-                </div>
-
-                <div className="p-4 space-y-1">
-                    {sidebarItems.map((item) => {
-                        const isActive = pathname.startsWith(item.href);
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={cn(
-                                    "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                                    isActive
-                                        ? "bg-primary/10 text-primary"
-                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                                )}
-                            >
-                                <item.icon className="h-4 w-4" />
-                                {item.label}
-                            </Link>
-                        )
-                    })}
-                </div>
-
-                <div className="absolute bottom-4 left-0 right-0 px-4">
-                    <Link
-                        href="/settings"
-                        className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-                    >
-                        <Settings className="h-4 w-4" />
-                        Settings
-                    </Link>
-                </div>
-            </div>
-
-            {/* Overlay for mobile */}
-            {isOpen && (
-                <div
-                    className="fixed inset-0 bg-black/50 z-40 md:hidden"
-                    onClick={() => setIsOpen(false)}
-                />
-            )}
-        </>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 bg-slate-900 border-r-slate-800 text-white w-72">
+                <Sidebar />
+            </SheetContent>
+        </Sheet>
     );
 }

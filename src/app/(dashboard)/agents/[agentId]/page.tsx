@@ -131,10 +131,10 @@ export default function AgentBuilderPage() {
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-hidden flex">
-                <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
+                <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
                     <Tabs defaultValue="configuration" className="w-full max-w-4xl mx-auto">
-                        <TabsList className="mb-6">
+                        <TabsList className="mb-6 flex flex-wrap h-auto gap-2">
                             <TabsTrigger value="configuration">Configuration</TabsTrigger>
                             <TabsTrigger value="tools">Tools</TabsTrigger>
                             <TabsTrigger value="knowledge">Knowledge</TabsTrigger>
@@ -143,7 +143,7 @@ export default function AgentBuilderPage() {
 
                         <TabsContent value="configuration" className="space-y-6">
                             {/* Basic Info */}
-                            <div className="grid gap-6 p-6 border rounded-lg bg-card">
+                            <div className="grid gap-6 p-6 border rounded-lg bg-card/50 backdrop-blur-sm">
                                 <div className="grid gap-2">
                                     <Label htmlFor="name">Agent Name</Label>
                                     <Input
@@ -151,6 +151,7 @@ export default function AgentBuilderPage() {
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
                                         placeholder="e.g. Support Assistant"
+                                        className="bg-background/50"
                                     />
                                 </div>
 
@@ -161,12 +162,13 @@ export default function AgentBuilderPage() {
                                         value={language}
                                         onChange={(e) => setLanguage(e.target.value)}
                                         placeholder="en"
+                                        className="bg-background/50"
                                     />
                                 </div>
                             </div>
 
                             {/* Voice Settings */}
-                            <div className="grid gap-6 p-6 border rounded-lg bg-card">
+                            <div className="grid gap-6 p-6 border rounded-lg bg-card/50 backdrop-blur-sm">
                                 <h3 className="font-semibold">Voice Settings</h3>
                                 <div className="grid gap-2">
                                     <Label>Voice</Label>
@@ -176,7 +178,7 @@ export default function AgentBuilderPage() {
                             </div>
 
                             {/* Prompt Engineering */}
-                            <div className="grid gap-6 p-6 border rounded-lg bg-card">
+                            <div className="grid gap-6 p-6 border rounded-lg bg-card/50 backdrop-blur-sm">
                                 <h3 className="font-semibold">Prompt Engineering</h3>
 
                                 <div className="grid gap-2">
@@ -187,15 +189,16 @@ export default function AgentBuilderPage() {
                                         value={firstMessage}
                                         onChange={(e) => setFirstMessage(e.target.value)}
                                         placeholder="Hello! How can I help you today?"
+                                        className="bg-background/50"
                                     />
-                                    <p className="text-xs text-muted-foreground">The first tiling the agent will say.</p>
+                                    <p className="text-xs text-muted-foreground">The first message the agent will say.</p>
                                 </div>
 
                                 <div className="grid gap-2">
                                     <Label htmlFor="prompt">System Prompt</Label>
                                     <Textarea
                                         id="prompt"
-                                        className="font-mono text-sm min-h-[300px]"
+                                        className="font-mono text-sm min-h-[300px] bg-background/50"
                                         value={prompt}
                                         onChange={(e) => setPrompt(e.target.value)}
                                         placeholder="You are a helpful assistant..."
@@ -206,14 +209,14 @@ export default function AgentBuilderPage() {
                         </TabsContent>
 
                         <TabsContent value="tools">
-                            <div className="p-6 border rounded-lg bg-card">
+                            <div className="p-6 border rounded-lg bg-card/50 backdrop-blur-sm">
                                 <h3 className="font-semibold mb-4">Enabled Tools</h3>
                                 <ToolsSelector selectedToolIds={selectedTools} onChange={setSelectedTools} />
                             </div>
                         </TabsContent>
 
                         <TabsContent value="knowledge">
-                            <div className="p-6 border rounded-lg bg-card">
+                            <div className="p-6 border rounded-lg bg-card/50 backdrop-blur-sm">
                                 <h3 className="font-semibold mb-4">Knowledge Base</h3>
                                 <p className="text-sm text-muted-foreground mb-4">Select documents to give your agent context.</p>
                                 <KnowledgeSelector selectedDocIds={selectedDocs} onChange={setSelectedDocs} />
@@ -230,7 +233,7 @@ export default function AgentBuilderPage() {
                 </div>
 
                 {/* Right Panel / Test Console */}
-                <div className="w-[400px] border-l bg-background flex flex-col">
+                <div className="w-full lg:w-[400px] border-t lg:border-t-0 lg:border-l bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex flex-col h-[500px] lg:h-auto">
                     <CallConsole agentName={name} agentId={agentId} />
                 </div>
             </div>
