@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { Pica, type Tool } from "@/lib/pica";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Loader2, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 interface ToolsSelectorProps {
     selectedToolIds: string[];
@@ -28,7 +27,9 @@ export function ToolsSelector({ selectedToolIds, onChange }: ToolsSelectorProps)
             // The prompt example says `const toolList = await res.json();`.
             // It implies it might be an array or object. PicaOS docs typically return { tools: [...] } or array.
             // I'll handle both safery.
-            const list = Array.isArray(data) ? data : (data.tools || []);
+            const list = Array.isArray(data)
+                ? (data as Tool[])
+                : ((data as { tools?: Tool[] }).tools ?? []);
             setTools(list);
         } catch (err) {
             console.error("Failed to load tools", err);
@@ -52,23 +53,26 @@ export function ToolsSelector({ selectedToolIds, onChange }: ToolsSelectorProps)
     return (
         <div className="grid gap-3">
             {tools.map((tool) => {
-                const isSelected = selectedToolIds.includes(tool.tool_id || "");
+                const toolId = tool.tool_id;
+                if (!toolId) return null;
+
+                const isSelected = selectedToolIds.includes(toolId);
                 return (
-                    <div key={tool.tool_id} className="flex items-start space-x-3 p-3 border rounded-md bg-background hover:bg-muted/50 transition-colors">
+                    <div key={toolId} className="flex items-start space-x-3 p-3 border rounded-md bg-background hover:bg-muted/50 transition-colors">
                         <Checkbox
-                            id={tool.tool_id}
+                            id={toolId}
                             checked={isSelected}
                             onCheckedChange={(checked) => {
-                                if (checked) {
-                                    onChange([...selectedToolIds, tool.tool_id || ""]);
+                                if (checked === true) {
+                                    onChange([...selectedToolIds, toolId]);
                                 } else {
-                                    onChange(selectedToolIds.filter(id => id !== tool.tool_id));
+                                    onChange(selectedToolIds.filter((id) => id !== toolId));
                                 }
                             }}
                         />
                         <div className="grid gap-1.5 leading-none">
                             <Label
-                                htmlFor={tool.tool_id}
+                                htmlFor={toolId}
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                             >
                                 {tool.name}

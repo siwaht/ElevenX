@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type SVGProps } from "react";
 import { Pica, type Agent } from "@/lib/pica";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Loader2 } from "lucide-react";
@@ -77,7 +77,7 @@ export default function AgentsPage() {
                         </div>
                         <h3 className="text-lg font-semibold">No agents found</h3>
                         <p className="text-sm text-muted-foreground max-w-sm mt-1 mb-6">
-                            You haven't created any agents yet. Get started by creating your first voice agent.
+                            You have not created any agents yet. Get started by creating your first voice agent.
                         </p>
                         <Button asChild>
                             <Link href="/agents/new">Create Agent</Link>
@@ -112,7 +112,7 @@ export default function AgentsPage() {
     );
 }
 
-function UsersIcon(props: any) {
+function UsersIcon(props: SVGProps<SVGSVGElement>) {
     return (
         <svg
             {...props}

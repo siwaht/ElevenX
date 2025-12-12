@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Pica } from "@/lib/pica";
 import { Button } from "@/components/ui/button";
-import { Loader2, Phone, Calendar, Clock } from "lucide-react";
+import { Loader2, Phone } from "lucide-react";
 import {
     Table,
     TableBody,
@@ -14,8 +14,17 @@ import {
 } from "@/components/ui/table"; // Need to create/ensure table component
 import { formatDistanceToNow } from "date-fns";
 
+type Call = {
+    conversation_id: string;
+    agent_name?: string;
+    start_time_unix_secs: number;
+    duration_secs: number;
+    status: string;
+    [key: string]: unknown;
+};
+
 export default function CallsPage() {
-    const [calls, setCalls] = useState<any[]>([]);
+    const [calls, setCalls] = useState<Call[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -27,9 +36,9 @@ export default function CallsPage() {
             setLoading(true);
             // Try to fetch from API, if fails, use mock for demo
             try {
-                const data = await Pica.listConversations();
-                setCalls(data.conversations || []);
-            } catch (e) {
+                const data = (await Pica.listConversations()) as { conversations?: Call[] };
+                setCalls(data.conversations ?? []);
+            } catch {
                 console.warn("API fetch failed, utilizing mock data for UI demo");
                 setCalls([
                     { conversation_id: "conv_1", agent_name: "Support Agent", start_time_unix_secs: Date.now() / 1000 - 3600, duration_secs: 120, status: "completed" },

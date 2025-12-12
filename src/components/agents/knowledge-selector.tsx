@@ -6,13 +6,20 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Loader2, FileText } from "lucide-react";
 
+type KnowledgeDoc = {
+    id?: string;
+    document_id?: string;
+    name?: string;
+    [key: string]: unknown;
+};
+
 interface KnowledgeSelectorProps {
     selectedDocIds: string[];
     onChange: (ids: string[]) => void;
 }
 
 export function KnowledgeSelector({ selectedDocIds, onChange }: KnowledgeSelectorProps) {
-    const [docs, setDocs] = useState<any[]>([]);
+    const [docs, setDocs] = useState<KnowledgeDoc[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -22,10 +29,12 @@ export function KnowledgeSelector({ selectedDocIds, onChange }: KnowledgeSelecto
     const loadDocs = async () => {
         try {
             setLoading(true);
-            const data = await Pica.listIDs();
+            const data = (await Pica.listIDs()) as unknown;
             // Adjust based on actual API response structure
             // The prompt says listIDs returns list of docs.
-            const list = Array.isArray(data) ? data : (data.documents || []);
+            const list = Array.isArray(data)
+                ? (data as KnowledgeDoc[])
+                : ((data as { documents?: KnowledgeDoc[] }).documents ?? []);
             setDocs(list);
         } catch (err) {
             console.error("Failed to load knowledge base", err);
@@ -49,35 +58,37 @@ export function KnowledgeSelector({ selectedDocIds, onChange }: KnowledgeSelecto
     return (
         <div className="grid gap-3">
             {docs.map((doc) => {
-                const isSelected = selectedDocIds.includes(doc.id || doc.document_id || "");
+                const id = doc.id ?? doc.document_id;
+                if (!id) return null;
+
+                const isSelected = selectedDocIds.includes(id);
                 return (
-                    <div key={doc.id || doc.document_id} className="flex items-start space-x-3 p-3 border rounded-md bg-background hover:bg-muted/50 transition-colors">
+                    <div key={id} className="flex items-start space-x-3 p-3 border rounded-md bg-background hover:bg-muted/50 transition-colors">
                         <Checkbox
-                            id={doc.id || doc.document_id}
+                            id={id}
                             checked={isSelected}
                             onCheckedChange={(checked) => {
-                                const id = doc.id || doc.document_id;
-                                if (checked) {
+                                if (checked === true) {
                                     onChange([...selectedDocIds, id]);
                                 } else {
-                                    onChange(selectedDocIds.filter(d => d !== id));
+                                    onChange(selectedDocIds.filter((d) => d !== id));
                                 }
                             }}
                         />
                         <div className="grid gap-1.5 leading-none">
                             <Label
-                                htmlFor={doc.id || doc.document_id}
+                                htmlFor={id}
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex items-center gap-2"
                             >
                                 <FileText className="h-3 w-3" />
                                 {doc.name || "Untitled Document"}
                             </Label>
                             <p className="text-xs text-muted-foreground truncate max-w-[300px]">
-                                ID: {doc.id || doc.document_id}
+                                ID: {id}
                             </p>
                         </div>
                     </div>
-                )
+                );
             })}
         </div>
     );

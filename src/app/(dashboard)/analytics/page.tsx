@@ -4,9 +4,14 @@ import { useEffect, useState } from "react";
 import { Pica } from "@/lib/pica";
 import { Loader2, TrendingUp, Users, MessageSquare } from "lucide-react";
 
+type CharacterStats = {
+    total_usage?: number;
+    [key: string]: unknown;
+};
+
 export default function AnalyticsPage() {
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState<any>(null);
+    const [stats, setStats] = useState<CharacterStats | null>(null);
 
     useEffect(() => {
         loadStats();
@@ -17,7 +22,7 @@ export default function AnalyticsPage() {
             setLoading(true);
             const now = Date.now() / 1000;
             const start = now - 86400 * 7;
-            const data = await Pica.getCharacterStats(Math.floor(start), Math.floor(now));
+            const data = (await Pica.getCharacterStats(Math.floor(start), Math.floor(now))) as CharacterStats;
             setStats(data);
         } catch (err) {
             console.error(err);
@@ -37,7 +42,7 @@ export default function AnalyticsPage() {
                         <TrendingUp className="h-4 w-4" /> Total Usage
                     </div>
                     <div className="text-2xl font-bold">
-                        {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : (stats?.total_usage || "0")} chars
+                        {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : (stats?.total_usage ?? 0)} chars
                     </div>
                 </div>
 

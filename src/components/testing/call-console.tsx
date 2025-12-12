@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Phone, PhoneOff, Send, User, Bot, Activity } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 interface CallConsoleProps {
@@ -12,7 +11,7 @@ interface CallConsoleProps {
     agentId: string;
 }
 
-export function CallConsole({ agentName, agentId }: CallConsoleProps) {
+export function CallConsole({ agentName }: CallConsoleProps) {
     const [isCallActive, setIsCallActive] = useState(false);
     const [micActive, setMicActive] = useState(false);
     const [messages, setMessages] = useState<{ role: "user" | "agent" | "system", content: string }[]>([]);
@@ -86,7 +85,7 @@ export function CallConsole({ agentName, agentId }: CallConsoleProps) {
                         <div className="text-center text-muted-foreground text-sm mt-10">
                             <Mic className="h-10 w-10 mx-auto mb-3 opacity-20" />
                             <p>Ready to test.</p>
-                            <p className="text-xs">Click "Start Call" to begin interaction.</p>
+                            <p className="text-xs">Click Start Call to begin interaction.</p>
                         </div>
                     )}
                     {messages.map((msg, i) => (

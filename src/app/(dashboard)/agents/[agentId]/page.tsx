@@ -2,15 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Pica, type Agent } from "@/lib/pica";
+import { Pica, type ConversationConfig, type CreateAgentBody } from "@/lib/pica";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea"; // Need to create or ensure this exists
 import { Label } from "@/components/ui/label"; // Need to create/ensure
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Need to create/ensure
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { VoiceSelector } from "@/components/agents/voice-selector";
 import { ToolsSelector } from "@/components/agents/tools-selector";
 import { KnowledgeSelector } from "@/components/agents/knowledge-selector";
@@ -34,41 +33,49 @@ export default function AgentBuilderPage() {
     const [selectedTools, setSelectedTools] = useState<string[]>([]);
     const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
 
-    useEffect(() => {
-        if (!isNew && agentId) {
-            loadAgent();
-        }
-    }, [agentId]);
-
-    const loadAgent = async () => {
-        try {
-            setLoading(true);
-            const data = await Pica.getAgent(agentId);
-            // Map response to state
-            setName(data.name || "");
-            setFirstMessage(data.conversation_config?.agent?.first_message || "");
-            setPrompt(data.conversation_config?.agent?.prompt?.prompt || "");
-            setLanguage(data.conversation_config?.agent?.language || "en");
-            // Assuming voice is in conversation_config.tts.voice_id based on standard schema, though not in minimal prompt
-            // We will safeguard access
-            // @ts-ignore
-            setVoiceId(data.conversation_config?.tts?.voice_id || "");
-            // @ts-ignore
-            setSelectedTools(data.conversation_config?.agent?.tools || []);
-            // @ts-ignore
-            // knowledge_base is likely an array of objects { id: string, type: 'file' } or similar. Assuming IDs for now.
-            setSelectedDocs(data.conversation_config?.agent?.knowledge_base?.map((k: any) => k.id) || []);
-        } catch (err) {
-            console.error("Failed to load agent", err);
-        } finally {
-            setLoading(false);
-        }
+    type AgentDetailResponse = {
+        name?: string;
+        conversation_config?: Partial<ConversationConfig>;
     };
+
+    useEffect(() => {
+        if (isNew || !agentId) return;
+
+        let cancelled = false;
+
+        const load = async () => {
+            try {
+                setLoading(true);
+
+                const data = (await Pica.getAgent(agentId)) as AgentDetailResponse;
+                if (cancelled) return;
+
+                const config = data.conversation_config;
+                setName(data.name || "");
+                setFirstMessage(config?.agent?.first_message || "");
+                setPrompt(config?.agent?.prompt?.prompt || "");
+                setLanguage(config?.agent?.language || "en");
+                setVoiceId(config?.tts?.voice_id || "");
+                setSelectedTools(config?.agent?.tools || []);
+                setSelectedDocs((config?.agent?.knowledge_base || []).map((k) => k.id));
+            } catch (err) {
+                console.error("Failed to load agent", err);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        };
+
+        load();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [agentId, isNew]);
 
     const handleSave = async () => {
         try {
             setSaving(true);
-            const payload = {
+            const payload: CreateAgentBody = {
                 name,
                 conversation_config: {
                     agent: {
@@ -77,15 +84,15 @@ export default function AgentBuilderPage() {
                         prompt: { prompt },
                         dynamic_variables: { dynamic_variable_placeholders: {} }, // Todo
                         tools: selectedTools,
-                        knowledge_base: selectedDocs.map(id => ({ id, type: 'file' })) // Generic assumption
+                        knowledge_base: selectedDocs.map((id) => ({ id, type: "file" })),
                     },
                     tts: { voice_id: voiceId },
                     // Defaults or preserved values
-                }
+                },
             };
 
             if (isNew) {
-                const res = await Pica.createAgent(payload as any); // Type assertion for now
+                const res = (await Pica.createAgent(payload)) as { agent_id: string };
                 router.push(`/agents/${res.agent_id}`);
             } else {
                 // Update not strictly defined in Pica helper yet, need to check docs/helper
@@ -203,7 +210,7 @@ export default function AgentBuilderPage() {
                                         onChange={(e) => setPrompt(e.target.value)}
                                         placeholder="You are a helpful assistant..."
                                     />
-                                    <p className="text-xs text-muted-foreground">Define the agent's persona and logic.</p>
+                                    <p className="text-xs text-muted-foreground">Define the agent persona and logic.</p>
                                 </div>
                             </div>
                         </TabsContent>

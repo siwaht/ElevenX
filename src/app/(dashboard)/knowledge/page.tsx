@@ -3,10 +3,17 @@
 import { useEffect, useState } from "react";
 import { Pica } from "@/lib/pica";
 import { Button } from "@/components/ui/button";
-import { Plus, FileText, Loader2 } from "lucide-react";
+import { Plus, FileText } from "lucide-react";
+
+type KnowledgeDoc = {
+    id?: string;
+    document_id?: string;
+    name?: string;
+    [key: string]: unknown;
+};
 
 export default function KnowledgePage() {
-    const [docs, setDocs] = useState<any[]>([]);
+    const [docs, setDocs] = useState<KnowledgeDoc[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -16,8 +23,10 @@ export default function KnowledgePage() {
     const loadDocs = async () => {
         try {
             setLoading(true);
-            const data = await Pica.listIDs();
-            const list = Array.isArray(data) ? data : (data.documents || []);
+            const data = (await Pica.listIDs()) as unknown;
+            const list = Array.isArray(data)
+                ? (data as KnowledgeDoc[])
+                : ((data as { documents?: KnowledgeDoc[] }).documents ?? []);
             setDocs(list);
         } catch (err) {
             console.error(err);

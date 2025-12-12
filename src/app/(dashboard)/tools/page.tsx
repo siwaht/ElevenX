@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 
 export default function ToolsPage() {
     const [tools, setTools] = useState<Tool[]>([]);
@@ -36,7 +35,9 @@ export default function ToolsPage() {
         try {
             setLoading(true);
             const data = await Pica.listTools();
-            const list = Array.isArray(data) ? data : (data.tools || []);
+            const list = Array.isArray(data)
+                ? (data as Tool[])
+                : ((data as { tools?: Tool[] }).tools ?? []);
             setTools(list);
         } catch (err) {
             console.error(err);

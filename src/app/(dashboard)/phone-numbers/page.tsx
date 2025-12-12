@@ -1,17 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Pica } from "@/lib/pica";
 import { Button } from "@/components/ui/button";
-import { Loader2, Plus, Phone } from "lucide-react";
+import { Plus, Phone } from "lucide-react";
+
+// Mock data as list capability wasn't in list prompt, only Create
+const numbers = [
+    { phone_number: "+1234567890", provider: "twilio", label: "Demo Line" },
+];
 
 export default function PhoneNumbersPage() {
-    const [loading, setLoading] = useState(false);
-
-    // Mock data as list capability wasn't in list prompt, only Create
-    const [numbers, setNumbers] = useState([
-        { phone_number: "+1234567890", provider: "twilio", label: "Demo Line" }
-    ]);
 
     return (
         <div className="p-8 max-w-7xl mx-auto space-y-8">

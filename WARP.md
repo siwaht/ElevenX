@@ -32,8 +32,9 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
   - `testing/` - Testing utilities (call-console)
   - `theme-provider.tsx` - Next-themes setup for dark/light mode
 
-- `src/lib/` - Utility functions and API client
-  - `pica.ts` - PicaOS API client with typed methods for agents, tools, phone numbers, knowledge base, and analytics
+- `src/lib/` - Utilities and API clients
+  - `pica.ts` - Browser-safe client wrapper that calls the app's `/api/pica/*` route handlers
+  - `pica.server.ts` - Server-only PicaOS passthrough client (stores action IDs + adds secret headers)
   - `utils.ts` - Generic utility functions (cn for Tailwind class merging)
 
 ### Key Dependencies
@@ -44,9 +45,9 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 - **Theming**: next-themes for dark/light mode toggle
 
 ### Data Flow
-1. **API Client** (`src/lib/pica.ts`) - Centralized PicaOS passthrough endpoints with hardcoded action IDs
-2. **Components** - Fetch data directly from Pica client in page components (no centralized state management)
-3. **UI Layer** - Renders data using Shadcn components; route-based navigation via sidebar
+1. **UI (client components)** calls `Pica.*` methods from `src/lib/pica.ts`.
+2. `Pica.*` calls the Next.js route handlers under `src/app/api/pica/**`.
+3. Route handlers call `src/lib/pica.server.ts`, which injects Pica headers (secret/connection/action-id) and forwards requests to PicaOS.
 
 ### Design System
 - **Colors**: Tailwind defaults with accent colors (sky, violet, pink, orange, green, emerald) for different sections
@@ -57,10 +58,10 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 ## Important Notes
 
 ### PicaOS Integration
-- Base URL: `https://api.picaos.com/v1/passthrough/v1`
-- All endpoints require headers: `x-pica-secret`, `x-pica-connection-key`, `x-pica-action-id`
-- Action IDs are hardcoded in `pica.ts` - refer to ElevenLabs API docs if updating endpoints
-- Environment variables: `PICA_SECRET_KEY`, `PICA_ELEVENLABS_CONNECTION_KEY`
+- Upstream base URL (server-side only): `https://api.picaos.com/v1/passthrough/v1`
+- All passthrough requests require headers: `x-pica-secret`, `x-pica-connection-key`, `x-pica-action-id` (set in `src/lib/pica.server.ts`).
+- The browser never calls PicaOS directly; it calls `/api/pica/*` route handlers.
+- Environment variables required on the server: `PICA_SECRET_KEY`, `PICA_ELEVENLABS_CONNECTION_KEY`.
 
 ### TypeScript Configuration
 - Target: ES2017
@@ -77,5 +78,5 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 1. Pages are grouped under `(dashboard)` - this is a Next.js route group and doesn't appear in URLs
 2. Add new routes by creating folders/files under `src/app/(dashboard)/`
 3. UI components can be generated or imported from `src/components/ui/` - these are Shadcn components and should follow the existing pattern
-4. For API calls, add methods to the `Pica` object in `src/lib/pica.ts` with appropriate action IDs
+4. For new Pica endpoints, add a server method in `src/lib/pica.server.ts`, expose it via a route handler under `src/app/api/pica/**`, then call it from `src/lib/pica.ts`
 5. The sidebar automatically reflects all main routes defined in `src/components/layout/sidebar.tsx`

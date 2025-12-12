@@ -6,8 +6,6 @@ import { cn } from "@/lib/utils";
 import {
     Users,
     MessageSquare,
-    Mic,
-    Settings,
     BarChart3,
     Database,
     Phone,
