@@ -27,53 +27,57 @@
 }
 
 :root {
-  --background: 240 10% 98%;
-  /* Slate 50 */
-  --foreground: 240 10% 4%;
-  /* Slate 950 */
+  --background: 210 40% 98%;
+  /* Slate 50 - Crisp/Cool White */
+  --foreground: 222 47% 11%;
+  /* Slate 900 */
   --card: 0 0% 100%;
-  --card-foreground: 240 10% 4%;
+  --card-foreground: 222 47% 11%;
   --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 4%;
-  --primary: 258 90% 66%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 262 83% 58%;
   /* Vivid Violet */
   --primary-foreground: 0 0% 100%;
-  --secondary: 240 5% 96%;
-  --secondary-foreground: 240 6% 10%;
-  --muted: 240 5% 96%;
-  --muted-foreground: 240 4% 46%;
-  --accent: 258 90% 96%;
-  --accent-foreground: 258 90% 40%;
+  --secondary: 210 40% 96%;
+  /* Slate 100 */
+  --secondary-foreground: 222 47% 11%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  /* Slate 500 */
+  --accent: 262 83% 96%;
+  /* Light Violet Tint */
+  --accent-foreground: 262 83% 58%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
-  --border: 240 6% 90%;
-  --input: 240 6% 90%;
-  --ring: 258 90% 66%;
+  --border: 214 32% 91%;
+  /* Slate 200 - Visible but subtle borders */
+  --input: 214 32% 91%;
+  --ring: 262 83% 58%;
   --radius: 0.75rem;
 }
 
 .dark {
-  --background: 230 35% 7%;
-  /* Deep midnight blue #0b0f19 */
+  --background: 222 47% 11%;
+  /* Slate 950 - Rich Dark Blue */
   --foreground: 210 40% 98%;
-  --card: 232 30% 12%;
+  --card: 217 33% 17%;
   --card-foreground: 210 40% 98%;
-  --popover: 232 30% 12%;
+  --popover: 217 33% 17%;
   --popover-foreground: 210 40% 98%;
-  --primary: 258 90% 72%;
-  /* Lighter Violet for dark mode */
+  --primary: 263 70% 50%;
+  /* Deep Violet */
   --primary-foreground: 210 40% 98%;
-  --secondary: 232 30% 18%;
+  --secondary: 217 33% 17%;
   --secondary-foreground: 210 40% 98%;
-  --muted: 232 30% 18%;
+  --muted: 217 33% 17%;
   --muted-foreground: 215 20% 65%;
-  --accent: 258 80% 20%;
+  --accent: 217 33% 17%;
   --accent-foreground: 210 40% 98%;
-  --destructive: 0 63% 31%;
+  --destructive: 0 62% 30%;
   --destructive-foreground: 210 40% 98%;
-  --border: 232 30% 18%;
-  --input: 232 30% 18%;
-  --ring: 258 90% 72%;
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
+  --ring: 263 70% 50%;
 }
 
 * {
@@ -85,6 +89,19 @@ body {
   color: hsl(var(--foreground));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Light Theme Background Texture */
+@media (prefers-color-scheme: light) {
+  body {
+    background-image:
+      radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 0) 0, transparent 50%),
+      radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 0) 0, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 0) 0, transparent 50%);
+  }
+}
+
+.dark body {
   background-image:
     radial-gradient(circle at 15% 50%, rgba(124, 58, 237, 0.08), transparent 25%),
     radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.08), transparent 25%);
@@ -92,10 +109,12 @@ body {
 }
 
 .glass {
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, 0.85);
+  /* More opaque */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  /* Darker border */
 }
 
 .dark .glass {
@@ -104,17 +123,17 @@ body {
 }
 
 .glass-card {
-  background-color: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  background-color: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  /* Crisp border */
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 8px -2px rgba(0, 0, 0, 0.02);
 }
 
 .dark .glass-card {
   background-color: rgba(30, 41, 59, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  /* Slightly clearer border */
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
 }
 
