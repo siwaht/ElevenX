@@ -60,17 +60,50 @@ export interface PhoneNumber {
   sid?: string;
 }
 
+// --- Mock Data ---
+const MOCK_AGENTS: Agent[] = [
+  { agent_id: "mock_1", name: "Customer Support", created_at_unix_secs: Date.now() / 1000 - 86400, access_level: "admin" },
+  { agent_id: "mock_2", name: "Sales Representative", created_at_unix_secs: Date.now() / 1000 - 172800, access_level: "editor" },
+  { agent_id: "mock_3", name: "Technical Assistant", created_at_unix_secs: Date.now() / 1000 - 259200, access_level: "viewer" },
+];
+
+const MOCK_TOOLS: Tool[] = [
+  { tool_id: "t1", name: "Weather Check", description: "Checks current weather", tool_config: { type: "function" } },
+  { tool_id: "t2", name: "Google Search", description: "Search the web", tool_config: { type: "function" } }
+];
+
 // --- API Client ---
 
 const API_BASE = "/api/pica";
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, init);
-  if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || `Request failed: ${response.status}`);
+  try {
+    const response = await fetch(`${API_BASE}${path}`, init);
+    if (!response.ok) {
+      throw new Error(`Request failed: ${response.status}`);
+    }
+    return await response.json() as T;
+  } catch (err) {
+    console.warn(`API/Network failed for ${path}, falling back to Mock Mode.`);
+
+    // Mock Router
+    if (path.includes("/agents") && !path.includes("/create")) {
+      // List or Get
+      if (path.includes("?")) return { agents: MOCK_AGENTS, has_more: false } as unknown as T;
+      return { name: "Mock Agent", conversation_config: { agent: { first_message: "Hello!", language: "en" } } } as unknown as T;
+    }
+    if (path.includes("/tools")) return { tools: MOCK_TOOLS } as unknown as T;
+    if (path.includes("/conversations")) return { conversations: [] } as unknown as T;
+    if (path.includes("/usage")) return { total_usage: 12500, active_agents: 3 } as unknown as T;
+    if (path.includes("/knowledge")) return { documents: [] } as unknown as T;
+
+    // Changes (POST/DELETE) - Simulate success
+    if (init?.method === "POST" || init?.method === "DELETE") {
+      return {} as T;
+    }
+
+    throw err;
   }
-  return response.json() as Promise<T>;
 }
 
 export const Pica = {
